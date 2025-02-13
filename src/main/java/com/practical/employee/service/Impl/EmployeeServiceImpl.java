@@ -1,5 +1,6 @@
 package com.practical.employee.service.Impl;
 
+import com.practical.employee.exeptionHandle.EmployeeNotFoundException;
 import com.practical.employee.model.Employee;
 import com.practical.employee.repository.EmployeeRepository;
 import com.practical.employee.service.EmployeeService;
@@ -32,16 +33,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee updateEmployee(Long id, Employee employee) {
-        try{
-            if(employeeRepository.existsById(id)){
-                employee.setId(id);
-                return employeeRepository.save(employee);
-            }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
+        return employeeRepository.findById(id)
+                .map(existingEmployee -> {
+                    employee.setId(id);
+                    return employeeRepository.save(employee);
+                })
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee with ID " + id + " not found"));
     }
 
     @Override
